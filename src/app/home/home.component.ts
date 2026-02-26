@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { afterNextRender, Component, inject, signal } from '@angular/core';
 import {
   IonContent,
   IonHeader,
@@ -7,11 +7,13 @@ import {
   IonButton,
   IonButtons,
   IonIcon,
+  IonModal,
 } from '@ionic/angular/standalone';
 import { PhotoService } from './data-access/photo.service';
 import { addIcons } from 'ionicons';
-import { cameraOutline } from 'ionicons/icons';
+import { cameraOutline, play } from 'ionicons/icons';
 import { PhotoListComponent } from './ui/photo-list.component';
+import { SlideshowComponent } from '../slideshow/slideshow.component';
 
 @Component({
   selector: 'app-home',
@@ -26,6 +28,9 @@ import { PhotoListComponent } from './ui/photo-list.component';
           >
             <ion-icon name="camera-outline" slot="icon-only"></ion-icon>
           </ion-button>
+          <ion-button (click)="modalIsOpen.set(true)">
+            <ion-icon name="play" slot="icon-only"></ion-icon>
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -34,6 +39,18 @@ import { PhotoListComponent } from './ui/photo-list.component';
       <app-photo-list
         [photos]="photoService.photosWithSafeUrl()"
       ></app-photo-list>
+      <ion-modal
+        [isOpen]="modalIsOpen()"
+        [canDismiss]="true"
+        [presentingElement]="presentingElement()"
+        (ionModalDidDismiss)="modalIsOpen.set(false)"
+      >
+        <ng-template>
+          <app-slideshow
+            [photos]="photoService.photosWithSafeUrl()"
+          ></app-slideshow>
+        </ng-template>
+      </ion-modal>
     </ion-content>
   `,
   imports: [
@@ -44,13 +61,22 @@ import { PhotoListComponent } from './ui/photo-list.component';
     IonButton,
     IonButtons,
     IonIcon,
+    IonModal,
     PhotoListComponent,
+    SlideshowComponent,
   ],
 })
 export default class HomeComponent {
   photoService = inject(PhotoService);
+  modalIsOpen = signal(false);
+
+  presentingElement = signal<HTMLElement | null>(null);
 
   constructor() {
-    addIcons({ cameraOutline });
+    addIcons({ cameraOutline, play });
+
+    afterNextRender(() => {
+      this.presentingElement.set(document.querySelector('.ion-page'));
+    });
   }
 }
