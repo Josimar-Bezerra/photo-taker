@@ -20,7 +20,10 @@ import { PhotoListComponent } from './ui/photo-list.component';
       <ion-toolbar color="danger">
         <ion-title>Snapaday</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="photoService.add$.next()">
+          <ion-button
+            (click)="photoService.add$.next()"
+            [disabled]="photoService.hasTakenPhotoToday()"
+          >
             <ion-icon name="camera-outline" slot="icon-only"></ion-icon>
           </ion-button>
         </ion-buttons>
