@@ -52,6 +52,16 @@ export class PhotoService {
     })),
   );
 
+  hasTakenPhotoToday = computed(() =>
+    this.photos().find(
+      (photo) =>
+        new Date().setHours(0, 0, 0, 0) ===
+        new Date(photo.dateTaken).setHours(0, 0, 0, 0),
+    )
+      ? true
+      : false,
+  );
+
   add$ = new Subject<void>();
 
   constructor() {
