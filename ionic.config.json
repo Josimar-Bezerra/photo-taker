@@ -1,0 +1,7 @@
+{
+  "name": "ionicstart-snapaday",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
