@@ -1,4 +1,11 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { catchError, EMPTY, Subject, switchMap } from 'rxjs';
 import { PhotoData } from 'src/app/shared/interfaces/photo';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,11 +20,13 @@ import { Platform } from '@ionic/angular';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
+import { StorageService } from 'src/app/shared/data-access/storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
   platform = inject(Platform);
   sanitizer = inject(DomSanitizer);
+  storageService = inject(StorageService);
 
   options: ImageOptions = {
     quality: 50,
@@ -29,13 +38,18 @@ export class PhotoService {
     source: CameraSource.Camera,
   };
 
-  photos = signal<PhotoData[]>([]);
+  loadedPhotos = this.storageService.loadedPhotos;
+
+  photos = linkedSignal({
+    source: this.loadedPhotos.value,
+    computation: (photos) => photos ?? [],
+  });
 
   photosWithSafeUrl = computed(() =>
     this.photos().map((photo) => ({
       ...photo,
       safeResourceUrl: this.sanitizer.bypassSecurityTrustUrl(photo.path),
-    }))
+    })),
   );
 
   add$ = new Subject<void>();
@@ -46,7 +60,7 @@ export class PhotoService {
         switchMap(() => Camera.getPhoto(this.options)),
         switchMap((photo) => this.writeFile(photo)),
         catchError(() => EMPTY),
-        takeUntilDestroyed()
+        takeUntilDestroyed(),
       )
       .subscribe(({ uniqueName, filePath, permanentFile }) =>
         this.photos.update((photos) => [
@@ -58,8 +72,15 @@ export class PhotoService {
               : filePath!,
             dateTaken: new Date().toISOString(),
           } as PhotoData,
-        ])
+        ]),
       );
+
+    effect(() => {
+      const photos = this.photos();
+      if (this.loadedPhotos.status() === 'resolved') {
+        this.storageService.savePhotos(photos);
+      }
+    });
   }
 
   async writeFile(photo: Photo) {
