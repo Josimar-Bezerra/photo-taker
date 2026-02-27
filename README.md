@@ -31,5 +31,4 @@ Clone the repository:
 
 ```bash
 git https://github.com/Josimar-Bezerra/photo-taker.git
-cd ionicstart-snapaday
 ```
