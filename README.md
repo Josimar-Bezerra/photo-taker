@@ -1,4 +1,4 @@
-# Photo Take
+# Photo Taker
 
 An Ionic Angular application for taking a photo a day.
 
