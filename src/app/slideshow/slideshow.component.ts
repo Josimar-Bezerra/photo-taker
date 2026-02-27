@@ -47,6 +47,13 @@ import { SlideshowImageComponent } from './ui/slideshow-image.component';
     IonToolbar,
     SlideshowImageComponent,
   ],
+  styles: [
+    `
+      :host {
+        height: 100%;
+      }
+    `,
+  ],
 })
 export class SlideshowComponent {
   modalCtrl = inject(ModalController);

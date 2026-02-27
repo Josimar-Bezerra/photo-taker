@@ -6,7 +6,16 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
-import { catchError, EMPTY, Subject, switchMap } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  EMPTY,
+  from,
+  map,
+  of,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import { PhotoData } from 'src/app/shared/interfaces/photo';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -63,6 +72,7 @@ export class PhotoService {
   );
 
   add$ = new Subject<void>();
+  remove$ = new Subject<string>();
 
   constructor() {
     this.add$
@@ -83,6 +93,30 @@ export class PhotoService {
             dateTaken: new Date().toISOString(),
           } as PhotoData,
         ]),
+      );
+
+    this.remove$
+      .pipe(
+        concatMap((name) => {
+          if (this.platform.is('capacitor')) {
+            return from(
+              Filesystem.deleteFile({
+                path: name,
+                directory: Directory.Data,
+              }),
+            ).pipe(
+              catchError(() => EMPTY),
+              map((name) => name),
+            );
+          }
+
+          return of(name);
+        }),
+      )
+      .subscribe((name) =>
+        this.photos.update((photos) =>
+          photos.filter((photo) => photo.name !== name),
+        ),
       );
 
     effect(() => {
