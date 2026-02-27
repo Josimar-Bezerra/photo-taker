@@ -4,7 +4,7 @@ An Ionic Angular application for taking a photo a day.
 
 ---
 
-## 🎮 About The Project
+## About The Project
 
 This Ionic Angular application features:
 
