@@ -38,6 +38,7 @@ import { SlideshowComponent } from '../slideshow/slideshow.component';
     <ion-content>
       <app-photo-list
         [photos]="photoService.photosWithSafeUrl()"
+        (delete)="photoService.remove$.next($event)"
       ></app-photo-list>
       <ion-modal
         [isOpen]="modalIsOpen()"

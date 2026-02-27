@@ -17,19 +17,19 @@ import { PhotoData } from 'src/app/shared/interfaces/photo';
   template: `
     <ion-list lines="none">
       @for (photo of photoList(); track photo.name) {
-      <ion-item-sliding>
-        <ion-item>
-          <img [src]="photo.safeResourceUrl" />
-          <ion-badge slot="end" color="light">
-            {{ photo.daysAgo }}
-          </ion-badge>
-        </ion-item>
-        <ion-item-options side="end">
-          <ion-item-option (click)="delete.emit(photo.name)" color="danger">
-            <ion-icon name="trash" slot="icon-only"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
+        <ion-item-sliding>
+          <ion-item>
+            <img [src]="photo.safeResourceUrl" />
+            <ion-badge slot="end" color="light">
+              {{ photo.daysAgo }}
+            </ion-badge>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option (click)="delete.emit(photo.name)" color="danger">
+              <ion-icon name="trash" slot="icon-only"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
       }
     </ion-list>
   `,
@@ -42,7 +42,33 @@ import { PhotoData } from 'src/app/shared/interfaces/photo';
     IonItemSliding,
     IonList,
   ],
-  styles: [``],
+  styles: [
+    `
+      ion-list {
+        padding: 0;
+      }
+
+      ion-item-sliding {
+        margin-bottom: 2px;
+      }
+
+      ion-item {
+        --inner-padding-end: 0px;
+        --padding-start: 0px;
+
+        img {
+          width: 100%;
+          height: auto;
+        }
+      }
+
+      ion-badge {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+      }
+    `,
+  ],
 })
 export class PhotoListComponent {
   photos = input.required<PhotoData[]>();
@@ -52,7 +78,7 @@ export class PhotoListComponent {
     this.photos().map((photo) => ({
       ...photo,
       daysAgo: this.calculateDaysAgo(photo.dateTaken),
-    }))
+    })),
   );
 
   constructor() {
@@ -64,7 +90,7 @@ export class PhotoListComponent {
     const takenDate = new Date(date);
     const oneDayInMin = 24 * 60 * 60 * 1000;
     const diffDays = Math.round(
-      Math.abs(takenDate.getTime() - now.getTime()) / oneDayInMin
+      Math.abs(takenDate.getTime() - now.getTime()) / oneDayInMin,
     );
 
     if (diffDays === 0) {
